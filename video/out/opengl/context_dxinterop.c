@@ -23,6 +23,7 @@
 #include "osdep/windows_utils.h"
 #include "video/out/w32_common.h"
 #include "context.h"
+#include "dxinterop.h"
 
 // For WGL_ACCESS_WRITE_DISCARD_NV, etc.
 #include <GL/wglext.h>
@@ -44,6 +45,8 @@ struct priv {
     IDirect3DSurface9 *backbuffer;
     IDirect3DSurface9 *rtarget;
     HANDLE rtarget_h;
+
+    struct dxinterop_display display;
 
     // OpenGL offscreen context
     HWND os_wnd;
@@ -581,8 +584,10 @@ static int dxinterop_init(struct MPGLContext *ctx, int flags)
 
     DwmEnableMMCSS(TRUE);
 
-    ctx->native_display_type = "IDirect3DDevice9Ex";
-    ctx->native_display = p->device;
+    p->display.device = p->device;
+    p->display.device_h = p->device_h;
+    ctx->native_display_type = "dxinterop_display";
+    ctx->native_display = &p->display;
 
     return 0;
 fail:
